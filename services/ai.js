@@ -75,12 +75,12 @@ function apiBase() {
 }
 function defaultModelFor(base) {
   if (base.includes('groq')) return 'llama-3.1-8b-instant';
-  if (base.includes('generativelanguage')) return 'gemini-2.0-flash';
+  if (base.includes('generativelanguage')) return 'gemini-2.5-flash';
   return 'gpt-4o-mini';
 }
 function fallbackModelsFor(base) {
   if (base.includes('groq')) return ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'llama3-8b-8192'];
-  if (base.includes('generativelanguage')) return ['gemini-2.0-flash', 'gemini-1.5-flash'];
+  if (base.includes('generativelanguage')) return ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
   return ['gpt-4o-mini', 'gpt-3.5-turbo'];
 }
 async function chatCompletion(messages, temperature = 0.7) {
