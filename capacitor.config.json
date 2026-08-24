@@ -1,0 +1,16 @@
+{
+  "appId": "app.datone.mobile",
+  "appName": "DAT One",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "preferredContentMode": "mobile"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

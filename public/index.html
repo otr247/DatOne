@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+
+  <!-- ── PWA meta ─────────────────────────────────────────────────────────── -->
+  <title>DAT One — Dispatch · Paperwork · Profit</title>
+  <meta name="description" content="DAT One — freight dispatch management: loads, contacts, documents, DAT board." />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DAT One" />
+  <meta name="application-name" content="DAT One" />
+
+  <!-- ── PWA manifest + icons ─────────────────────────────────────────────── -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* ── DAT One sidebar logo ───────────────────────────────────────────── */
+    .dat-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 8px 16px;
+    }
+    .dat-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .dat-brand-text .name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .dat-brand-text .name span { color: #ff7a00; }
+    .dat-brand-text .tag {
+      font-size: 0.58rem;
+      color: #94a3b8;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    /* ── Session kicked overlay ─────────────────────────────────────────── */
+    #kickedOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    #kickedOverlay.show { display: flex; }
+    #kickedOverlay .box {
+      background: #0f172a;
+      border: 2px solid #ff7a00;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      color: #fff;
+      max-width: 360px;
+      width: calc(100% - 40px);
+    }
+    #kickedOverlay .box img {
+      width: 60px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+    #kickedOverlay .box h2 { margin: 0 0 10px; font-size: 1.25rem; }
+    #kickedOverlay .box p  { color: #94a3b8; font-size: .87rem; margin: 0 0 22px; }
+    #kickedOverlay .box button {
+      background: #ff7a00; color: #fff; border: none;
+      border-radius: 8px; padding: 10px 28px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+    }
+
+    /* ── PWA install banner ─────────────────────────────────────────────── */
+    #pwaBanner {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #0f172a;
+      border: 1px solid #ff7a00;
+      border-radius: 14px;
+      padding: 14px 18px;
+      z-index: 9998;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.5);
+      align-items: center;
+      gap: 12px;
+      max-width: 340px;
+      color: #fff;
+      font-size: .88rem;
+    }
+    #pwaBanner img { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; }
+    #pwaBanner .bt strong { display: block; font-size: .95rem; }
+    #pwaBanner .bt span   { color: #94a3b8; font-size: .76rem; }
+    #pwaBanner .bb { display: flex; gap: 7px; margin-left: auto; flex-shrink: 0; }
+    #pwaBanner button { border: none; border-radius: 7px; padding: 7px 12px; font-size: .8rem; cursor: pointer; font-weight: 600; }
+    #pwaInstallBtn { background: #ff7a00; color: #fff; }
+    #pwaDismissBtn { background: rgba(255,255,255,0.12); color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     LOGIN
+════════════════════════════════════════════════════════ -->
+<div class="login-wrap" id="loginView">
+  <div class="login-card">
+
+    <!-- DAT One logo + brand -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <img src="https://sc04.alicdn.com/kf/S19ff90ef7b2b44b29b03e4990a0121b7x.jpg"
+           alt="DAT One" onerror="this.style.display='none'"
+           style="width:100px;height:100px;border-radius:20px;object-fit:cover;margin-bottom:10px;display:block;margin-left:auto;margin-right:auto;" />
+      <h1 style="margin:0 0 2px;font-size:1.9rem;font-weight:900;color:#0f172a;">
+        DAT <span style="color:#ff7a00;">ONE</span>
+      </h1>
+      <p style="margin:0;font-size:.68rem;color:#64748b;letter-spacing:1.2px;text-transform:uppercase;">
+        Dispatch · Paperwork · Profit
+      </p>
+    </div>
+
+    <div class="err-msg" id="loginErr"></div>
+    <form id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input id="loginUser" type="text" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="loginPass" type="password" autocomplete="current-password" required />
+      </div>
+      <button class="btn primary" type="submit" style="width:100%;padding:10px;">Sign In</button>
+    </form>
+    <p style="text-align:center;margin-top:14px;font-size:13px;display:flex;justify-content:center;gap:22px;">
+      <a href="#" id="forgotUserLink" style="color:var(--primary);text-decoration:none;">Forgot username?</a>
+      <a href="#" id="forgotLink" style="color:var(--primary);text-decoration:none;">Forgot password?</a>
+    </p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     FORGOT USERNAME
+════════════════════════════════════════════════════════ -->
+<div class="login-wrap" id="forgotUserView" style="display:none;">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:20px;">
+      <h1 style="margin:0 0 2px;font-size:1.9rem;font-weight:900;color:#0f172a;">
+        DAT <span style="color:#ff7a00;">ONE</span>
+      </h1>
+      <p style="margin:0;font-size:.68rem;color:#64748b;letter-spacing:1.2px;text-transform:uppercase;">
+        Dispatch · Paperwork · Profit
+      </p>
+    </div>
+    <h2 style="margin:0 0 6px;font-size:1.15rem;color:#0f172a;">Find your username</h2>
+    <p style="margin:0 0 16px;font-size:.8rem;color:#64748b;line-height:1.5;">
+      Enter the email address or phone number on your account. If it matches, we'll email you the username.
+    </p>
+    <div class="err-msg" id="forgotUserErr"></div>
+    <div class="ok-msg" id="forgotUserOk">If that account exists, your username has been sent to its email. Check your inbox (and spam folder).</div>
+    <form id="forgotUserForm">
+      <div class="field">
+        <label>Email or phone number</label>
+        <input id="forgotUserId" type="text" autocomplete="email" required />
+      </div>
+      <button class="btn primary" type="submit" style="width:100%;padding:10px;" id="forgotUserSendBtn">Send username</button>
+    </form>
+    <p style="text-align:center;margin-top:14px;font-size:13px;">
+      <a href="#" id="forgotUserBack" style="color:var(--primary);text-decoration:none;">Back to sign in</a>
+    </p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     FORGOT PASSWORD
+════════════════════════════════════════════════════════ -->
+<div class="login-wrap" id="forgotView" style="display:none;">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:20px;">
+      <h1 style="margin:0 0 2px;font-size:1.9rem;font-weight:900;color:#0f172a;">
+        DAT <span style="color:#ff7a00;">ONE</span>
+      </h1>
+      <p style="margin:0;font-size:.68rem;color:#64748b;letter-spacing:1.2px;text-transform:uppercase;">
+        Dispatch · Paperwork · Profit
+      </p>
+    </div>
+    <h2 style="margin:0 0 6px;font-size:1.15rem;color:#0f172a;">Reset your password</h2>
+    <p style="margin:0 0 16px;font-size:.8rem;color:#64748b;line-height:1.5;">
+      Enter your username or registered email. If it matches an account, we'll email you a link to set a new password.
+    </p>
+    <div class="err-msg" id="forgotErr"></div>
+    <div class="ok-msg" id="forgotOk">If that account exists, a reset link has been sent to its email. Check your inbox (and spam folder) — the link expires in 1 hour.</div>
+    <form id="forgotForm">
+      <div class="field">
+        <label>Username or email</label>
+        <input id="forgotId" type="text" autocomplete="username" required />
+      </div>
+      <button class="btn primary" type="submit" style="width:100%;padding:10px;" id="forgotSendBtn">Send reset link</button>
+    </form>
+    <p style="text-align:center;margin-top:14px;font-size:13px;">
+      <a href="#" id="forgotBack" style="color:var(--primary);text-decoration:none;">Back to sign in</a>
+    </p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     RESET PASSWORD
+════════════════════════════════════════════════════════ -->
+<div class="login-wrap" id="resetView" style="display:none;">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:20px;">
+      <h1 style="margin:0 0 2px;font-size:1.9rem;font-weight:900;color:#0f172a;">
+        DAT <span style="color:#ff7a00;">ONE</span>
+      </h1>
+      <p style="margin:0;font-size:.68rem;color:#64748b;letter-spacing:1.2px;text-transform:uppercase;">
+        Dispatch · Paperwork · Profit
+      </p>
+    </div>
+    <h2 style="margin:0 0 6px;font-size:1.15rem;color:#0f172a;">Set a new password</h2>
+    <p style="margin:0 0 16px;font-size:.8rem;color:#64748b;" id="resetForUser"></p>
+    <div class="err-msg" id="resetErr"></div>
+    <div class="ok-msg" id="resetOk">Password updated. You can now sign in with your new password.</div>
+    <form id="resetForm">
+      <div class="field">
+        <label>New password</label>
+        <input id="resetPass" type="password" autocomplete="new-password" minlength="6" required />
+      </div>
+      <div class="field">
+        <label>Confirm new password</label>
+        <input id="resetPass2" type="password" autocomplete="new-password" minlength="6" required />
+      </div>
+      <button class="btn primary" type="submit" style="width:100%;padding:10px;" id="resetSubmitBtn">Update password</button>
+    </form>
+    <p style="text-align:center;margin-top:14px;font-size:13px;">
+      <a href="#" id="resetBack" style="color:var(--primary);text-decoration:none;">Back to sign in</a>
+    </p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MAIN APP
+════════════════════════════════════════════════════════ -->
+<div class="app" id="appView">
+
+  <!-- ── Mobile menu (hamburger + backdrop) ───────────────────────────────── -->
+  <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+  <div class="menu-backdrop" id="menuBackdrop"></div>
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <nav class="sidebar" id="sidebar">
+
+    <!-- DAT One brand (replaces old "Dispatch Hub" text) -->
+    <div class="dat-brand">
+      <img src="https://sc04.alicdn.com/kf/S19ff90ef7b2b44b29b03e4990a0121b7x.jpg"
+           alt="DAT One" onerror="this.style.display='none'" />
+      <div class="dat-brand-text">
+        <div class="name">DAT <span>ONE</span></div>
+        <div class="tag">Dispatch · Paperwork · Profit</div>
+      </div>
+    </div>
+
+    <button class="nav-item" data-page="dashboard"><span class="ic">📊</span> Dashboard</button>
+    <button class="nav-item" data-page="loads"><span class="ic">🚛</span> Loads</button>
+    <button class="nav-item" data-page="carriers"><span class="ic">🏢</span> Carriers</button>
+    <button class="nav-item" data-page="drivers"><span class="ic">👤</span> Drivers</button>
+    <button class="nav-item" data-page="brokers"><span class="ic">🤝</span> Brokers</button>
+    <button class="nav-item" data-page="datboard"><span class="ic">🔍</span> DAT Board</button>
+    <button class="nav-item" data-page="outreach"><span class="ic">📧</span> Outreach</button>
+    <button class="nav-item" data-page="voicecalls"><span class="ic">📞</span> Call Log</button>
+    <button class="nav-item" data-page="aichat"><span class="ic">🤖</span> AI Chat</button>
+    <button class="nav-item" data-page="templates"><span class="ic">✉️</span> Templates</button>
+    <button class="nav-item" data-page="negotiations"><span class="ic">💬</span> AI Negotiations</button>
+    <button class="nav-item admin-only" data-page="users"><span class="ic">🔐</span> Users</button>
+    <button class="nav-item admin-only" data-page="mail"><span class="ic">📬</span> Mail</button>
+    <button class="nav-item" data-page="settings"><span class="ic">⚙️</span> Settings</button>
+
+    <div class="spacer"></div>
+
+    <div class="userbox">
+      <b id="whoName"></b>
+      <span id="whoRole"></span>
+    </div>
+    <div style="padding:8px 0;">
+      <button class="nav-item" id="logoutBtn" style="width:100%;color:#f87171;">
+        <span class="ic">↩</span> Sign Out
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Main content ─────────────────────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page" id="page-dashboard">
+      <div class="page-head"><h2>Dashboard</h2></div>
+      <div class="dash-controls">
+        <div class="field"><label>Period</label>
+          <select id="perfPeriod">
+            <option value="daily">Daily</option>
+            <option value="weekly" selected>Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="all">All Time (by month)</option>
+          </select>
+        </div>
+        <div class="field"><label>Scope</label>
+          <select id="perfCarrier"><option value="">All Carriers</option></select>
+        </div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="grid-2">
+        <div class="card"><h3>Revenue &amp; Dispatch Fees</h3><canvas id="revChart"></canvas></div>
+        <div class="card"><h3>Average RPM</h3><canvas id="rpmChart"></canvas></div>
+        <div class="card"><h3>Loads</h3><canvas id="loadsChart"></canvas></div>
+        <div class="card"><h3>Load Status</h3><canvas id="statusChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- LOADS -->
+    <div class="page" id="page-loads">
+      <div class="page-head">
+        <h2>Loads</h2>
+        <div class="actions"><button class="btn primary" id="addLoadBtn">+ New Load</button></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Ref</th><th>Status</th><th>Lane</th><th>Broker</th>
+            <th>Carrier</th><th>Driver</th><th>Rate</th><th>Fee</th><th></th>
+          </tr></thead>
+          <tbody id="loadsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CARRIERS -->
+    <div class="page" id="page-carriers">
+      <div class="page-head">
+        <h2>Carriers</h2>
+        <div class="actions"><button class="btn primary" id="addCarrierBtn">+ New Carrier</button></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Name</th><th>Company</th><th>Manager</th><th>Dispatch %</th>
+            <th>Phone</th><th>Email</th><th></th>
+          </tr></thead>
+          <tbody id="carriersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DRIVERS -->
+    <div class="page" id="page-drivers">
+      <div class="page-head">
+        <h2>Drivers</h2>
+        <div class="actions"><button class="btn primary" id="addDriverBtn">+ New Driver</button></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Name</th><th>Carrier</th><th>CDL</th><th>Endorsements</th>
+            <th>Unit</th><th>Truck Type</th><th>Phone</th><th></th>
+          </tr></thead>
+          <tbody id="driversBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BROKERS -->
+    <div class="page" id="page-brokers">
+      <div class="page-head">
+        <h2>Brokers</h2>
+        <div class="actions"><button class="btn primary" id="addBrokerBtn">+ New Broker</button></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Name</th><th>Company</th><th>Phone</th><th>Email</th><th>Notes</th><th></th>
+          </tr></thead>
+          <tbody id="brokersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DAT BOARD -->
+    <div class="page" id="page-datboard">
+      <div class="page-head"><h2>DAT Load Board</h2></div>
+      <div class="rotate-hint" id="datRotateHint" style="display:none;">↻ Rotate your phone to landscape for the best DAT board view</div>
+      <div id="datPrefChips" class="pref-chips" style="display:none;"></div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="dat-tabs" id="datTabBar">
+          <button class="dat-tab active" data-tab="0">Search 1</button>
+          <button class="dat-tab" data-tab="1">Search 2</button>
+          <button class="dat-tab" data-tab="2">Search 3</button>
+        </div>
+        <div id="datFilters"><!-- injected by app.js --></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Age</th><th>Lane</th><th>Equip</th><th>Miles</th>
+            <th>DH-O</th><th>DH-D</th><th>Weight</th><th>Length</th>
+            <th>Rate</th><th>RPM</th><th>Broker</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="datBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI CHAT — fleet assistant (teach it your fleet; it remembers) -->
+    <div class="page" id="page-aichat">
+      <div class="page-head"><h2>🤖 AI Fleet Assistant</h2></div>
+      <p class="hint">Chat with the AI to teach it your fleet: <b>truck MC numbers per area</b>, preferred rates, weight/length limits, dates, times — per truck, driver, owner, or the whole operation. It remembers, shows them here, and uses them on AI voice calls to brokers.</p>
+      <div class="chat-layout">
+        <div class="card chat-card">
+          <div class="chat-msgs" id="chatMsgs"><p class="muted">Loading…</p></div>
+          <div class="chat-input">
+            <input id="chatInput" placeholder='e.g. "Truck 7 MC is 123456, preferred rate $2.10/mile, max 44,000 lbs, for the Chicago area"' />
+            <button class="btn primary" id="chatSendBtn">Send</button>
+          </div>
+        </div>
+        <div class="card chat-prefs">
+          <h3>Saved preferences</h3>
+          <div id="chatPrefs"><p class="muted">Nothing saved yet — tell the AI about your fleet above.</p></div>
+          <p class="hint">These are fed into every AI voice call to brokers.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTREACH — AI emails to brokers from DAT listings -->
+    <div class="page" id="page-outreach">
+      <div class="page-head">
+        <h2>Broker Outreach</h2>
+        <div class="actions" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn" id="outreachPollBtn">↻ Check Replies</button>
+          <button class="btn" id="outreachRefreshBtn">Refresh</button>
+        </div>
+      </div>
+      <p class="hint">AI emails sent to brokers straight from DAT listings (✉️ Email button on the board). Replies from those brokers get picked up automatically. Connect Google in Settings to send. When a posting has no email, use the 📞 Call button and the AI voice agent calls instead.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Date</th><th>Broker</th><th>Lane</th><th>Ref</th><th>Status</th><th>Subject</th><th></th>
+          </tr></thead>
+          <tbody id="outreachBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CALL LOG — AI voice calls (live control room) -->
+    <div class="page" id="page-voicecalls">
+      <div class="page-head">
+        <h2>AI Voice Calls</h2>
+        <div class="actions"><button class="btn" id="voiceRefreshBtn">Refresh</button></div>
+      </div>
+      <p class="hint">Outbound AI calls to brokers (📞 Call on the DAT board). Watch the <b>live transcript</b>, get alerted when the broker is close to booking or the agent is stuck, <b>take over</b> (your phone rings into the call), listen live, and replay recordings.</p>
+      <div class="voice-layout">
+        <div class="card voice-list-card">
+          <h3>Calls</h3>
+          <div class="table-wrap" style="max-height:58vh;overflow:auto;">
+            <table>
+              <thead><tr>
+                <th>Time</th><th>Broker</th><th>Lane / Ref</th><th>Status</th>
+              </tr></thead>
+              <tbody id="voiceBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card voice-detail-card">
+          <h3 id="voiceDetailTitle">Call detail</h3>
+          <div id="voiceAlert" class="voice-alert" style="display:none;"></div>
+          <div id="voiceActions" class="voice-actions" style="display:none;"></div>
+          <div id="voiceTranscript" class="voice-transcript"><p class="muted">Select a call to see the live transcript, recording, and controls.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEMPLATES -->
+    <div class="page" id="page-templates">
+      <div class="page-head"><h2>Email Templates</h2></div>
+      <div class="card" style="max-width:700px;">
+        <p class="hint" id="tplMode"></p>
+        <div class="form-grid">
+          <div class="field">
+            <label>Type</label>
+            <select id="tplKind">
+              <option value="inquiry">Load Inquiry</option>
+              <option value="negotiate">Rate Negotiation</option>
+              <option value="book">Booking Confirmation</option>
+              <option value="checkcall">Check Call</option>
+            </select>
+          </div>
+          <div class="field"><label>Broker Name</label><input id="tplBroker" placeholder="TQL, CH Robinson…"></div>
+          <div class="field"><label>Origin</label><input id="tplOrigin" placeholder="Chicago, IL"></div>
+          <div class="field"><label>Destination</label><input id="tplDest" placeholder="Dallas, TX"></div>
+          <div class="field"><label>Rate ($)</label><input id="tplRate" type="number" placeholder="2500"></div>
+          <div class="field"><label>Load Ref</label><input id="tplRef" placeholder="L-12345"></div>
+          <div class="field"><label>Subject</label><input id="tplSubject" placeholder="Load inquiry — Chicago → Dallas"></div>
+        </div>
+        <div class="actions" style="margin-bottom:12px;flex-wrap:wrap;">
+          <button class="btn primary" id="tplGenBtn">Generate</button>
+          <button class="btn" id="tplCopyBtn">Copy</button>
+          <button class="btn" id="tplEmailBtn">Open in Email</button>
+          <input id="tplTo" type="email" placeholder="broker@email.com" style="max-width:220px;" />
+          <button class="btn" id="tplSendBtn" title="Send from your connected Gmail">Send Email</button>
+        </div>
+        <div class="field">
+          <label>Draft</label>
+          <textarea id="tplOut" rows="10" style="font-family:monospace;font-size:13px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS (admin) -->
+    <div class="page" id="page-users">
+      <div class="page-head">
+        <h2>Users</h2>
+        <div class="actions"><button class="btn primary" id="addUserBtn">+ New User</button></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Created</th><th></th>
+          </tr></thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI NEGOTIATIONS -->
+    <div class="page" id="page-negotiations">
+      <div class="page-head">
+        <h2>AI Negotiations</h2>
+        <div class="actions"><button class="btn primary" id="negNewBtn">+ New Campaign</button></div>
+      </div>
+      <p class="hint">Email bots that contact brokers on your target lane and negotiate rates automatically. Strict guardrails: never agrees below your minimum rate, stops after the round limit, and nothing books without you. Requires Google connected (Settings → Connect Google).</p>
+
+      <div id="negCreate" class="card" style="display:none;margin-bottom:16px;">
+        <h3>New Campaign</h3>
+        <div class="dat-filter-grid">
+          <div class="field"><label>Campaign name</label><input id="negName" placeholder="e.g. Chicago → Dallas this week"></div>
+          <div class="field"><label>Origin</label><input id="negOrigin" placeholder="e.g. Chicago, IL"></div>
+          <div class="field"><label>Destination</label><input id="negDest" placeholder="e.g. Dallas, TX"></div>
+          <div class="field"><label>Equipment</label><select id="negEquip"></select></div>
+          <div class="field"><label>Pickup date</label><input id="negPickup" type="date"></div>
+          <div class="field"><label>Target rate ($)</label><input id="negTarget" type="number" min="0" placeholder="e.g. 2200"></div>
+          <div class="field"><label>Minimum rate ($ — floor)</label><input id="negMin" type="number" min="0" placeholder="e.g. 1900"></div>
+          <div class="field"><label>Max rounds</label><input id="negRounds" type="number" min="1" max="6" value="3"></div>
+          <div class="field" style="display:flex;align-items:center;gap:8px;margin-top:22px;">
+            <input id="negAuto" type="checkbox" checked><label for="negAuto" style="margin:0;">Auto-send replies</label>
+          </div>
+          <div class="field" style="grid-column:1/-1;"><label>Brokers (leave empty = all brokers with emails)</label>
+            <select id="negBrokers" multiple size="4" style="width:100%;"></select>
+          </div>
+        </div>
+        <div class="dat-toolbar">
+          <button class="btn primary" id="negCreateBtn">Start Campaign</button>
+          <button class="btn" id="negCancelBtn">Cancel</button>
+          <span id="negErr" class="form-error"></span>
+        </div>
+      </div>
+
+      <div class="neg-layout">
+        <div class="card">
+          <h3>Campaigns</h3>
+          <div id="negList"><p class="muted">No campaigns yet — start one above.</p></div>
+        </div>
+        <div class="card">
+          <h3 id="negDetailTitle">Campaign detail</h3>
+          <div id="negDetail"><p class="muted">Select a campaign to see threads and messages.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIL (admin only) -->
+    <div class="page" id="page-mail">
+      <div class="page-head">
+        <h2>Inbox Monitor</h2>
+        <div class="actions" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <select id="mailAccount" style="min-width:220px;"><option value="">— Select connected account —</option></select>
+          <input id="mailQuery" placeholder="Search: from:, subject:, after:, text…" style="min-width:260px;">
+          <button class="btn primary" id="mailSearchBtn">Search</button>
+        </div>
+      </div>
+      <p class="hint">Read/search the inboxes of Google accounts connected through the app (official company mail). Accounts connected before the read permission existed must disconnect and reconnect once.</p>
+      <div class="mail-layout">
+        <div class="card mail-list-card">
+          <h3>Messages</h3>
+          <div id="mailList" class="mail-list"><p class="muted">Select an account and search to load messages.</p></div>
+        </div>
+        <div class="card mail-detail-card">
+          <h3 id="mailDetailTitle">Message</h3>
+          <div id="mailDetail" class="mail-detail"><p class="muted">Click a message to read it.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-head"><h2>Settings</h2></div>
+      <div style="display:grid;gap:20px;max-width:700px;">
+
+        <!-- Profile -->
+        <div class="card">
+          <h3>My Profile</h3>
+          <form id="profileForm">
+            <div class="form-grid">
+              <div class="field"><label>Full Name</label><input id="pfName"></div>
+              <div class="field"><label>Email</label><input id="pfEmail" type="email"></div>
+              <div class="field"><label>Phone</label><input id="pfPhone" type="tel"></div>
+            </div>
+            <button class="btn primary" type="submit">Save Profile</button>
+          </form>
+        </div>
+
+        <!-- Password -->
+        <div class="card">
+          <h3>Change Password</h3>
+          <form id="pwForm">
+            <div class="err-msg" id="pwErr"></div>
+            <div class="form-grid">
+              <div class="field"><label>Current Password</label><input id="pwCur" type="password"></div>
+              <div class="field"><label>New Password</label><input id="pwNew" type="password"></div>
+            </div>
+            <button class="btn primary" type="submit">Update Password</button>
+          </form>
+        </div>
+
+        <!-- Integrations -->
+        <div class="card">
+          <h3>Integrations</h3>
+          <div class="integration">
+            <div>
+              <span class="dot" id="dotGoogle"></span><b>Google</b>
+              <p class="hint" id="stGoogle" style="margin:4px 0 0 16px;"></p>
+              <p class="hint" id="googleEmailLbl" style="margin:4px 0 0 16px;"></p>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn primary" id="googleConnectBtn" style="display:none;">Connect Google</button>
+              <button class="btn danger" id="googleDisconnectBtn" style="display:none;">Disconnect</button>
+            </div>
+          </div>
+          <div class="integration">
+            <div><span class="dot" id="dotDat"></span><b>DAT Load Board</b></div>
+            <span class="muted" id="stDat"></span>
+          </div>
+          <div class="integration">
+            <div><span class="dot" id="dotAi"></span><b>AI Drafts</b></div>
+            <span class="muted" id="stAi"></span>
+          </div>
+          <div class="integration">
+            <div>
+              <b>Install App</b>
+              <p class="hint" style="margin:4px 0 0 16px;">Home-screen icon, full-screen, no browser chrome</p>
+            </div>
+            <button class="btn primary" id="installAppBtn">Install App</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /.main -->
+</div><!-- /#appView -->
+
+<!-- Modal host -->
+<div id="modalHost"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Session kicked overlay -->
+<div id="kickedOverlay">
+  <div class="box">
+    <img src="https://sc04.alicdn.com/kf/S19ff90ef7b2b44b29b03e4990a0121b7x.jpg"
+         alt="DAT One" onerror="this.style.display='none'" />
+    <h2>Session Ended</h2>
+    <p>Your account was signed in from another device or browser.<br>Only one active session is allowed at a time.</p>
+    <button onclick="window.location.reload()">Sign In Again</button>
+  </div>
+</div>
+
+<!-- PWA install banner -->
+<div id="pwaBanner">
+  <img src="https://sc04.alicdn.com/kf/S19ff90ef7b2b44b29b03e4990a0121b7x.jpg"
+       alt="DAT One" onerror="this.style.display='none'" />
+  <div class="bt">
+    <strong>Install DAT One</strong>
+    <span>Add to home screen</span>
+  </div>
+  <div class="bb">
+    <button id="pwaInstallBtn">Install</button>
+    <button id="pwaDismissBtn">Not now</button>
+  </div>
+</div>
+
+<script>
+// Native app shell (Capacitor): point API calls at the live Render backend.
+try {
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    window.API_BASE = 'https://dat-one.onrender.com';
+  }
+} catch (e) {}
+</script>
+<script src="/app.js"></script>
+
+<script>
+// ── Service Worker (PWA) ────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      setInterval(() => reg.update(), 60000);
+      reg.addEventListener('updatefound', () => {
+        const w = reg.installing;
+        w.addEventListener('statechange', () => {
+          if (w.state === 'installed' && navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        });
+      });
+    }).catch(e => console.warn('[SW]', e));
+  });
+}
+
+// ── PWA install banner ──────────────────────────────────────────────────────
+let _prompt = null;
+window.__pwaPrompt = null; // exposed so app.js "Install App" button can reuse it
+const banner = document.getElementById('pwaBanner');
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _prompt = e;
+  window.__pwaPrompt = e;
+  if (!sessionStorage.getItem('pwa-dismissed')) banner.style.display = 'flex';
+});
+document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+  if (!_prompt) return;
+  banner.style.display = 'none';
+  _prompt.prompt();
+  _prompt = null;
+  window.__pwaPrompt = null;
+});
+window.addEventListener('appinstalled', () => { banner.style.display = 'none'; window.__pwaPrompt = null; });
+document.getElementById('pwaDismissBtn').addEventListener('click', () => {
+  banner.style.display = 'none';
+  sessionStorage.setItem('pwa-dismissed', '1');
+});
+
+// ── Detect kicked session (401 after login) ─────────────────────────────────
+(function () {
+  let loggedIn = false;
+  const _fetch = window.fetch.bind(window);
+  window.fetch = async function (...args) {
+    const res = await _fetch(...args);
+    // Mark as logged in once the login call succeeds
+    const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
+    if (res.ok && url.includes('/api/login')) loggedIn = true;
+    if (res.ok && url.includes('/api/me'))    loggedIn = true;
+    // If we get a 401 after being logged in, show the kicked modal
+    if (res.status === 401 && loggedIn && !url.includes('/api/login')) {
+      document.getElementById('kickedOverlay').classList.add('show');
+    }
+    return res;
+  };
+})();
+</script>
+
+</body>
+</html>

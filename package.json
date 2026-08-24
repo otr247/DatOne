@@ -1,0 +1,39 @@
+{
+  "name": "dat-one",
+  "version": "2.0.0",
+  "description": "DAT One — Dispatch · Paperwork · Profit. All-in-one freight dispatch management SaaS.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "cap:sync": "cap sync",
+    "cap:open:android": "cap open android",
+    "cap:open:ios": "cap open ios",
+    "cap:build:android": "cap sync android && cd android && ./gradlew assembleDebug",
+    "cap:build:ios": "cap sync ios",
+    "cap:gen": "npx cap add android 2>/dev/null || true; npx cap add ios 2>/dev/null || true; npx cap sync"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "bcryptjs": "^2.4.3",
+    "cookie-session": "^2.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "googleapis": "^144.0.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^9.0.5",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.6.8",
+    "@capacitor/cli": "^7.6.8",
+    "@capacitor/core": "^7.6.8",
+    "@capacitor/ios": "^7.6.8"
+  }
+}

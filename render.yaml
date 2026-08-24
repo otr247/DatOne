@@ -1,0 +1,97 @@
+# render.yaml — one-click deploy to Render.com
+# In Render: New + > Blueprint > connect this repo. Render reads this file.
+#
+# NOTE ON DATA PERSISTENCE (important):
+#   Free tier has NO persistent disk, so the local SQLite DB resets on each
+#   restart. TWO fixes (pick one):
+#   A) FREE: set TURSO_DATABASE_URL + TURSO_AUTH_TOKEN (free hosted Turso DB at
+#      turso.tech) — the app stores everything there, survives restarts.
+#   B) PAID: upgrade to "Starter" (~$7/mo) and uncomment the disk block below.
+services:
+  - type: web
+    name: dat-one
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    # --- Option B: uncomment on a paid plan to persist data ---
+    # disk:
+    #   name: dat-one-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
+    envVars:
+      - key: DATA_DIR
+        value: ./data        # change to /var/data if you enable the disk above
+      # --- Option A: free hosted DB (Turso) — survives free-tier restarts ---
+      - key: TURSO_DATABASE_URL
+        sync: false          # libsql://yourdb-org.turso.io
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false          # set your own in the Render dashboard
+      - key: DISPATCHER_PASSWORD
+        sync: false
+      - key: APP_BASE_URL
+        sync: false          # e.g. https://dat-one.onrender.com
+      # Optional integrations (leave blank to run in demo mode):
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false          # https://dat-one.onrender.com/auth/google/callback
+      # Optional SMTP for new-user invite emails (falls back to admin's Gmail)
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: DAT_USERNAME
+        sync: false
+      - key: DAT_PASSWORD
+        sync: false
+      - key: DAT_API_TOKEN
+        sync: false
+      - key: DAT_BASE_URL
+        sync: false          # confirm against DAT Developer Portal docs
+      - key: DAT_LOAD_SEARCH_PATH
+        sync: false          # confirm against DAT Developer Portal docs
+      - key: DAT_METHOD
+        sync: false          # GET or POST
+      - key: OPENAI_API_KEY
+        sync: false
+      # Voice AI agent (v3: Twilio + Gemini Live — no Vapi)
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        sync: false          # gemini-2.5-flash-live
+      - key: GEMINI_VOICE
+        sync: false          # curated natural voices, rotated per call
+      - key: VOICE_AMBIENT_LEVEL
+        sync: false          # 0.035 default — very low room tone; 0 = off
+      - key: VOICE_AI_DISCLOSE
+        sync: false          # 1 = transparent when asked "are you an AI?"
+      - key: DEEPGRAM_API_KEY
+        sync: false          # optional live broker transcription
+      - key: MC_NUMBER
+        sync: false
+      - key: COMPANY_NAME
+        sync: false
+      - key: VOICE_FORWARD_TO
+        sync: false          # dispatcher phone for Take Over

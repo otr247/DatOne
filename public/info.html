@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DAT One — Dispatch · Paperwork · Profit</title>
+  <meta name="description" content="DAT One is a freight dispatch management app: loads, carriers, drivers, brokers, documents, DAT load board and performance dashboard." />
+  <style>
+    :root {
+      --brand: #ff7a00;
+      --brand-dark: #e56a00;
+      --bg: #0f172a;
+      --panel: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background: #f8fafc;
+      line-height: 1.6;
+    }
+    header {
+      background: var(--bg);
+      color: #fff;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header .brand { font-size: 20px; font-weight: 800; }
+    header .brand span { color: var(--brand); }
+    header .tag { font-size: 11px; color: #94a3b8; letter-spacing: 1.2px; text-transform: uppercase; }
+    .btn {
+      display: inline-block;
+      background: var(--brand);
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+    .btn:hover { background: var(--brand-dark); }
+    .btn.ghost { background: rgba(255,255,255,0.12); }
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #fff;
+      padding: 64px 32px;
+      text-align: center;
+    }
+    .hero h1 { margin: 0 0 12px; font-size: 40px; }
+    .hero h1 span { color: var(--brand); }
+    .hero p { color: #cbd5e1; max-width: 620px; margin: 0 auto 24px; font-size: 17px; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 32px; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 32px 0; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .card h3 { margin: 0 0 8px; font-size: 16px; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+    section h2 { margin: 48px 0 8px; font-size: 26px; }
+    section .muted { color: var(--muted); }
+    .legal { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+    .legal h3 { margin-top: 0; }
+    footer { background: var(--bg); color: #94a3b8; padding: 20px 32px; text-align: center; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">DAT <span>ONE</span></div>
+    <div class="tag">Dispatch · Paperwork · Profit</div>
+  </div>
+  <a class="btn" href="https://dat-one.onrender.com/">Sign In</a>
+</header>
+
+<div class="hero">
+  <h1>Run your freight dispatch in <span>one place</span></h1>
+  <p>DAT One is an all-in-one dispatch management app — loads, carriers, drivers, brokers, documents, DAT load board, AI email drafts and a performance dashboard.</p>
+  <a class="btn" href="https://dat-one.onrender.com/">Open the App</a>
+</div>
+
+<div class="wrap">
+  <div class="features">
+    <div class="card"><h3>🚛 Loads</h3><p>Track every load with refs, rates, dispatch fees, brokers, carriers and drivers — with automatic contact details.</p></div>
+    <div class="card"><h3>🏢 Contacts</h3><p>Carriers, drivers and brokers with equipment details, endorsements, dispatch percentages and more.</p></div>
+    <div class="card"><h3>🔍 DAT Board</h3><p>Search the load board with 25 equipment types, filters and live-style refresh.</p></div>
+    <div class="card"><h3>📄 Paperwork</h3><p>Attach rate cons, PODs and BOLs per load — backed up to Google Drive and linked in Google Sheets.</p></div>
+    <div class="card"><h3>📊 Dashboard</h3><p>Revenue, fees, miles and RPM trends — daily, weekly, monthly, quarterly, per carrier.</p></div>
+    <div class="card"><h3>✉️ Templates</h3><p>One-click inquiry, negotiation, booking and check-call drafts to brokers.</p></div>
+  </div>
+
+  <section>
+    <h2 id="contact">Contact</h2>
+    <p class="muted">For support or account questions, contact the administrator of your dispatch team.</p>
+  </section>
+
+  <section>
+    <h2 id="privacy">Privacy Policy</h2>
+    <div class="legal">
+      <h3>1. What we collect</h3>
+      <p>DAT One stores the information you enter while using the app: user accounts, contact details (carriers, drivers, brokers), load information and uploaded documents. When you connect a Google account, we store the OAuth tokens needed to sync documents to Google Drive, load data to Google Sheets and send emails, plus the email address of the connected account.</p>
+      <h3>2. How we use it</h3>
+      <p>Your data is used exclusively to operate the app: manage loads and contacts, sync to your own Google Drive and Sheets, send new-user invite emails, and generate message drafts. We do not sell or share your data with third parties.</p>
+      <h3>3. Storage</h3>
+      <p>Data is stored on our hosting provider's servers (Render.com) in a database. Uploaded documents are also copied to the connected user's own Google Drive. Access is protected by per-user accounts and passwords.</p>
+      <h3>4. Your choices</h3>
+      <p>You can disconnect Google at any time from the app's Settings page, delete loads, contacts and documents, and request account deletion from your administrator.</p>
+      <h3>5. Changes</h3>
+      <p>We may update this policy from time to time. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="terms">Terms of Service</h2>
+    <div class="legal">
+      <h3>1. Use of the service</h3>
+      <p>DAT One is provided for managing freight dispatch operations. You must keep your login credentials confidential and are responsible for activity under your account.</p>
+      <h3>2. Acceptable use</h3>
+      <p>You agree not to misuse the service, attempt to access other users' data, or use the service for unlawful purposes.</p>
+      <h3>3. Availability</h3>
+      <p>The service is provided "as is" without warranties. We aim for high availability but do not guarantee uninterrupted access.</p>
+      <h3>4. Liability</h3>
+      <p>To the maximum extent permitted by law, we are not liable for indirect or consequential damages arising from use of the service, including lost business or data.</p>
+      <h3>5. Termination</h3>
+      <p>Your administrator can remove accounts at any time. Upon termination, your data is deleted from the service.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  DAT One — Dispatch · Paperwork · Profit · <a href="#privacy" style="color:#ff7a00;">Privacy</a> · <a href="#terms" style="color:#ff7a00;">Terms</a> · <a href="https://dat-one.onrender.com/" style="color:#ff7a00;">Sign In</a>
+</footer>
+
+</body>
+</html>
